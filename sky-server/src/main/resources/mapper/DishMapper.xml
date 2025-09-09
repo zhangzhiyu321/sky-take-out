@@ -2,19 +2,44 @@
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
         "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
 <mapper namespace="com.sky.mapper.DishMapper">
-    <select id="list" resultType="com.sky.entity.Dish">
-        select * from dish
+    <select id="list" resultType="com.sky.vo.DishVO">
+        select di.*, ca.name as categoryName
+        from dish di
+        left join category ca on di.category_id = ca.id
         <where>
-            <if test="name != null and name!= ''">
-                and name like concat('%',#{name},'%')
+            <if test="name != null and name != ''">
+                and di.name like concat('%', #{name}, '%')
             </if>
-            <if test="categoryId != null and categoryId!= ''">
-                and category_id = #{categoryId}
+            <if test="categoryId != null">
+                and di.category_id = #{categoryId}
             </if>
-            <if test="status != null and status!= ''">
-                and `status` = #{status}
+            <if test="status != null">
+                and di.status = #{status}
             </if>
         </where>
-        order by create_time desc
+        order by di.create_time desc
     </select>
+
+    <delete id="delByIds">
+        delete from dish where id in
+        <foreach collection="ids" item="id" open="(" close=")" separator=",">
+            #{id}
+        </foreach>
+    </delete>
+
+    <update id="update">
+        UPDATE dish
+        <set>
+            <if test="name != null">name = #{name},</if>
+            <if test="categoryId != null">category_id = #{categoryId},</if>
+            <if test="price != null">price = #{price},</if>
+            <if test="status != null">status = #{status},</if>
+            <if test="image != null">image = #{image},</if>
+            <if test="description != null">description = #{description},</if>
+            <if test="updateTime != null">update_time = #{updateTime},</if>
+            <if test="updateUser != null">update_user = #{updateUser},</if>
+        </set>
+        WHERE id = #{id}   <!-- 必须有 WHERE -->
+
+    </update>
 </mapper>
